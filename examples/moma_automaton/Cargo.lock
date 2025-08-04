@@ -42,20 +42,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "moma"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6709d72da1d63d417f13a4dcfa8f8ce21d306e6fa7756dfbecd628ae890b6742"
+dependencies = [
+ "rand",
+]
+
+[[package]]
 name = "moma_automaton"
 version = "0.1.0"
 dependencies = [
- "moma",
+ "moma 0.3.0",
  "moma_simulation_engine",
 ]
 
 [[package]]
 name = "moma_simulation_engine"
-version = "0.1.2"
+version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f88f56c849c758d662ac9b5402ed81bc73a576bdbe9bff5e9cf5c856e0f8182d"
+checksum = "c284cbec80afb97bab21460e4d0f271922db31e9f26a6c25272e35335a8b46dc"
 dependencies = [
- "moma",
+ "moma 0.2.9",
  "rand",
 ]
 

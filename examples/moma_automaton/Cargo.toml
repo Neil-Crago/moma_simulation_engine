@@ -6,4 +6,4 @@ edition = "2024"
 
 [dependencies]
 moma = "0.3.0"
-moma_simulation_engine = "0.1.4"
+moma_simulation_engine = "0.1.5"
