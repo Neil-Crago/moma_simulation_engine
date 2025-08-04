@@ -1,0 +1,19 @@
+[package]
+name = "moma_simulation_engine"
+authors = ["Neil Crago"]
+description = "A Simulation engine powered by MOMA"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/neil-crago/moma"
+keywords = ["simulation", "moma", "cellular-automata", "complex-systems"]
+include = [
+    "src/*.rs",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE-MIT",
+]
+
+[dependencies]
+moma = "0.2.9"
+rand = "0.9.2"
