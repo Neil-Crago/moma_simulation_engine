@@ -1,8 +1,10 @@
 # MOMA Simulation Engine
 
-[](https://www.google.com/search?q=https://crates.io/crates/simulation-engine)
-[](https://www.google.com/search?q=https://docs.rs/simulation-engine)
-[](https://opensource.org/licenses/MIT)
+[![Crates.io](https://img.shields.io/crates/v/moma_simulation_engine.svg?style=flat-square)](https://crates.io/crates/moma_simulation_engine)
+[![Docs.rs](https://img.shields.io/docsrs/moma_simulation_engine?style=flat-square)](https://docs.rs/moma_simulation_engine)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue?style=flat-square)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/neil-crago/moma_simulation_engine/actions/workflows/rust.yml/badge.svg)](https://github.com/neil-crago/moma_simulation_engine/actions/workflows/rust.yml)
+[![Rust](https://github.com/Neil-Crago/moma_simulation_engine/actions/workflows/rust.yml/badge.svg)](https://github.com/Neil-Crago/moma_simulation_engine/actions/workflows/rust.yml)
 
 A library for creating and running dynamic systems, such as cellular automata, using the [MOMA (Moving Origin Modular Arithmetic)](https://www.google.com/search?q=https://github.com/Neil-Crago/moma) framework as the core update rule.
 
@@ -34,7 +36,7 @@ To use this engine in your own project, add it to your `Cargo.toml`.
 
 ```toml
 [dependencies]
-moma_simulation_engine = "0.1.3" # Or the most recent version
+moma_simulation_engine = "0.1.4" # Or the most recent version
 ```
 or just use ```cargo add moma_simulation_engine``` from the terminal
 
