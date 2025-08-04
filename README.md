@@ -34,11 +34,7 @@ To use this engine in your own project, add it to your `Cargo.toml`.
 
 ```toml
 [dependencies]
-# For now, using a local path. This will be updated when published to crates.io
-simulation-engine = { path = "../simulation-engine" }
-
-# You will also need the moma crate to access its strategies
-moma = { path = "../moma" }
+moma_simulation_engine = "0.1.1" # Or the most recent version
 ```
 
 ### Quick Start: Running a 1D Automaton
@@ -47,7 +43,7 @@ Here is a simple example of how to create, run, and display a MOMA-powered cellu
 
 ```rust
 use moma::strategy;
-use simulation_engine::CellularAutomaton;
+use moma_simulation_engine::CellularAutomaton;
 use std::{thread, time};
 
 fn main() {
