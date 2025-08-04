@@ -34,8 +34,9 @@ To use this engine in your own project, add it to your `Cargo.toml`.
 
 ```toml
 [dependencies]
-moma_simulation_engine = "0.1.1" # Or the most recent version
+moma_simulation_engine = "0.1.3" # Or the most recent version
 ```
+or just use ```cargo add moma_simulation_engine``` from the terminal
 
 ### Quick Start: Running a 1D Automaton
 
