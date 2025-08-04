@@ -2,10 +2,11 @@
 name = "moma_simulation_engine"
 authors = ["Neil Crago"]
 description = "A Simulation engine powered by MOMA"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "MIT"
-repository = "https://github.com/neil-crago/moma"
+repository = "https://github.com/neil-crago/moma-simulation-engine"
+documentation = "https://docs.rs/moma_simulation_engine"
 keywords = ["simulation", "moma", "cellular-automata", "complex-systems"]
 include = [
     "src/*.rs",
