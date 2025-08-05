@@ -13,15 +13,19 @@ use moma_simulation_engine::automaton::Moma2dAutomaton;
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 use winit::dpi::LogicalSize;
+// 'WindowEvent' is no longer needed directly, so it's removed.
 use winit::event::{Event, VirtualKeyCode};
 use winit::event_loop::{ControlFlow, EventLoop};
 use winit::window::WindowBuilder;
 use winit_input_helper::WinitInputHelper;
 
-// --- A* Pathfinding Logic (Adapted for Dynamic Costs) ---
+// --- A* Pathfinding Logic (Unchanged) ---
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-struct Point { x: usize, y: usize }
+struct Point {
+    x: usize,
+    y: usize,
+}
 
 #[derive(Debug, Eq, PartialEq)]
 struct Node {
@@ -37,14 +41,15 @@ impl Ord for Node {
 }
 
 impl PartialOrd for Node {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 fn manhattan_distance(a: Point, b: Point) -> u64 {
     ((a.x as i64 - b.x as i64).abs() + (a.y as i64 - b.y as i64).abs()) as u64
 }
 
-/// A* search on a dynamic grid where traversal cost is calculated by a MOMA ring.
 fn a_star_moma_cost(
     automaton: &Moma2dAutomaton<impl OriginStrategy>,
     cost_ring: &MomaRing<impl OriginStrategy>,
@@ -56,7 +61,11 @@ fn a_star_moma_cost(
     let mut cost_so_far: HashMap<Point, u64> = HashMap::new();
 
     cost_so_far.insert(start, 0);
-    frontier.push(Node { point: start, cost: 0, heuristic: manhattan_distance(start, goal) });
+    frontier.push(Node {
+        point: start,
+        cost: 0,
+        heuristic: manhattan_distance(start, goal),
+    });
 
     while let Some(current) = frontier.pop() {
         if current.point == goal {
@@ -70,34 +79,45 @@ fn a_star_moma_cost(
             return Some(path);
         }
 
-        let neighbors = [(-1, 0), (1, 0), (0, -1), (0, 1)].iter().filter_map(|&(dx, dy)| {
-            let nx = current.point.x as isize + dx;
-            let ny = current.point.y as isize + dy;
-            if nx >= 0 && nx < automaton.width as isize && ny >= 0 && ny < automaton.height as isize {
-                Some(Point { x: nx as usize, y: ny as usize })
-            } else {
-                None
-            }
-        });
+        let neighbors = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+            .iter()
+            .filter_map(|&(dx, dy)| {
+                let nx = current.point.x as isize + dx;
+                let ny = current.point.y as isize + dy;
+                if nx >= 0
+                    && nx < automaton.width as isize
+                    && ny >= 0
+                    && ny < automaton.height as isize
+                {
+                    Some(Point {
+                        x: nx as usize,
+                        y: ny as usize,
+                    })
+                } else {
+                    None
+                }
+            });
 
         for next_point in neighbors {
-            // DYNAMIC COST CALCULATION
             let current_val = automaton.state[current.point.y * automaton.width + current.point.x];
             let next_val = automaton.state[next_point.y * automaton.width + next_point.x];
-            let move_cost = cost_ring.residue(current_val, next_val) + 1; // Add 1 to avoid zero-cost moves
+            let move_cost = cost_ring.residue(current_val, next_val) + 1;
             let new_cost = cost_so_far[&current.point] + move_cost;
 
             if !cost_so_far.contains_key(&next_point) || new_cost < cost_so_far[&next_point] {
                 cost_so_far.insert(next_point, new_cost);
                 let priority = manhattan_distance(next_point, goal);
-                frontier.push(Node { point: next_point, cost: new_cost, heuristic: priority });
+                frontier.push(Node {
+                    point: next_point,
+                    cost: new_cost,
+                    heuristic: priority,
+                });
                 came_from.insert(next_point, current.point);
             }
         }
     }
     None
 }
-
 
 // --- Main Application ---
 
@@ -119,63 +139,74 @@ fn main() -> Result<(), Error> {
 
     let mut pixels = {
         let window_size = window.inner_size();
-        let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
+        let surface_texture =
+            SurfaceTexture::new(window_size.width, window_size.height, &window);
         Pixels::new(WIDTH, HEIGHT, surface_texture)?
     };
 
-    // --- Simulation Setup ---
     let modulus = 16;
-    let mut automaton = Moma2dAutomaton::new(WIDTH as usize, HEIGHT as usize, modulus, strategy::PrimeGap);
+    let mut automaton =
+        Moma2dAutomaton::new(WIDTH as usize, HEIGHT as usize, modulus, strategy::PrimeGap);
     let cost_ring = MomaRing::new(modulus, strategy::CompositeMass);
-    let start = Point { x: 10, y: HEIGHT as usize / 2 };
-    let goal = Point { x: WIDTH as usize - 10, y: HEIGHT as usize / 2 };
+    let start = Point {
+        x: 10,
+        y: HEIGHT as usize / 2,
+    };
+    let goal = Point {
+        x: WIDTH as usize - 10,
+        y: HEIGHT as usize / 2,
+    };
     let mut path: Option<Vec<Point>> = None;
 
     event_loop.run(move |event, _, control_flow| {
+        // Draw the current state
         if let Event::RedrawRequested(_) = event {
             draw(pixels.frame_mut(), &automaton, &path);
-            if pixels.render().is_err() {
+            if let Err(err) = pixels.render() {
+                eprintln!("pixels.render() failed: {err}");
                 *control_flow = ControlFlow::Exit;
                 return;
             }
         }
 
+        // Handle input events
         if input.update(&event) {
+            // Close events
+            // The `.quit()` method is deprecated. Use `.close_requested()` instead.
             if input.key_pressed(VirtualKeyCode::Escape) || input.close_requested() {
                 *control_flow = ControlFlow::Exit;
                 return;
             }
+
+            // Resize the window
             if let Some(size) = input.window_resized() {
-                if pixels.resize_surface(size.width, size.height).is_err() {
+                if let Err(err) = pixels.resize_surface(size.width, size.height) {
+                    eprintln!("pixels.resize_surface() failed: {err}");
                     *control_flow = ControlFlow::Exit;
                     return;
                 }
             }
 
-            // --- Core Simulation Step ---
-            // 1. Evolve the automaton's terrain.
+            // Update internal state and request a redraw
             automaton.step();
-            // 2. Re-calculate the optimal path on the new terrain.
             path = a_star_moma_cost(&automaton, &cost_ring, start, goal);
-            // 3. Request a redraw to show the new state.
             window.request_redraw();
         }
     });
 }
 
 /// Draws the automaton grid and the calculated path to the pixel buffer.
-fn draw(frame: &mut [u8], automaton: &Moma2dAutomaton<impl OriginStrategy>, path: &Option<Vec<Point>>) {
+fn draw(
+    frame: &mut [u8],
+    automaton: &Moma2dAutomaton<impl OriginStrategy>,
+    path: &Option<Vec<Point>>,
+) {
     for (i, pixel) in frame.chunks_exact_mut(4).enumerate() {
-        let x = i % automaton.width;
-        let y = i / automaton.width;
         let cell_state = automaton.state[i];
-        
-        // Color the terrain based on its state (energy level).
         let terrain_color = state_to_color(cell_state);
         pixel.copy_from_slice(&terrain_color);
     }
 
-    // Draw the calculated path on top of the terrain.
     if let Some(path_points) = path {
         for point in path_points {
             let i = point.y * automaton.width + point.x;

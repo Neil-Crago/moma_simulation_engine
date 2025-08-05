@@ -10,7 +10,7 @@ use moma_simulation_engine::grid::{Cell, Grid, Point};
 use moma_simulation_engine::maze;
 use moma_simulation_engine::pathfinding;
 use std::fs::File;
-use std::io::{BufWriter, Write};
+use std::io::BufWriter;
 
 fn main() -> std::io::Result<()> {
     println!("--- A* Maze Solver ---");
@@ -50,9 +50,9 @@ fn main() -> std::io::Result<()> {
 
 /// Draws a grid to a JPEG file with a given scaling factor.
 fn draw_grid_to_jpeg(grid: &Grid, scale: u32, filename: &str) -> std::io::Result<()> {
-    let white = Rgb([255, 255, 255]);
-    let black = Rgb([0, 0, 0]);
-    let path_color = Rgb([89, 131, 152]); // A nice slate blue
+    let white = Rgb([255u8, 255u8, 255u8]);
+    let black = Rgb([0u8, 0u8, 0u8]);
+    let path_color = Rgb([89u8, 131u8, 152u8]); // A nice slate blue
 
     let img_width = grid.width() as u32 * scale;
     let img_height = grid.height() as u32 * scale;
@@ -71,7 +71,7 @@ fn draw_grid_to_jpeg(grid: &Grid, scale: u32, filename: &str) -> std::io::Result
 
     let file = File::create(filename)?;
     let mut writer = BufWriter::new(file);
-    img.write_to(&mut writer, image::ImageOutputFormat::Jpeg(100))
+    img.write_to(&mut writer, image::ImageFormat::Jpeg)
         .expect("Failed to write image");
 
     Ok(())
