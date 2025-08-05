@@ -3,4 +3,5 @@
 /examples/moma_conways_game_of_life/target
 /examples/moma_pathfinder/target
 /examples/moma_dynamic_pathfinder/target
+/examples/moma_gower/target
 /*.lock
