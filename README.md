@@ -35,7 +35,7 @@ To use this engine in your own project, add it to your `Cargo.toml`.
 
 ```toml
 [dependencies]
-moma_simulation_engine = "0.1.4" # Or the most recent version
+moma_simulation_engine = "0.1.8" # Or the most recent version
 ```
 or just use ```cargo add moma_simulation_engine``` from the terminal
 
@@ -45,7 +45,7 @@ Here is a simple example of how to create, run, and display a MOMA-powered cellu
 
 ```rust
 use moma::strategy;
-use moma_simulation_engine::CellularAutomaton;
+use moma_simulation_engine::automaton::CellularAutomaton;
 use std::{thread, time};
 
 fn main() {
