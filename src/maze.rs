@@ -19,7 +19,7 @@ pub fn generate_maze(width: usize, height: usize) -> Grid {
 
     let mut grid = Grid::new(width, height, Cell::Blocked);
     let mut stack: Vec<Point> = Vec::new();
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     // Start carving from the center of the grid.
     let start_point = Point::new(1, 1);
