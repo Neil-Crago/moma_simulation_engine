@@ -11,11 +11,11 @@ type Cost = u32;
 /// Represents a node in the A* search space.
 #[derive(Debug, Eq, PartialEq)]
 pub struct Node {
-    point: Point,
+    pub point: Point,
     /// The cost from the start node to this node (g-cost).
-    cost: Cost,
+    pub cost: Cost,
     /// The estimated cost from this node to the goal (h-cost, the heuristic).
-    heuristic: Cost,
+    pub heuristic: Cost,
 }
 
 // The priority queue (BinaryHeap) needs `Ord`. We want to pop the node with the

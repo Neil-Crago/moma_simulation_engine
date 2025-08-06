@@ -10,12 +10,13 @@
 use moma_simulation_engine::grid::Point;
 use moma_simulation_engine::maze;
 use moma_simulation_engine::pathfinding;
+use moma_simulation_engine::pathfinding::Node;
 use rustfft::{FftPlanner, num_complex::Complex as FftComplex};
 use moma::core::{MomaRing, OriginStrategy};
 use moma::strategy;
 use pixels::{Error, Pixels, SurfaceTexture};
 use moma_simulation_engine::automaton::Moma2dAutomaton;
-use std::cmp::Ordering;
+//use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 use winit::dpi::LogicalSize;
 // 'WindowEvent' is no longer needed directly, so it's removed.
