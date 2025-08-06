@@ -10,7 +10,7 @@ type Cost = u32;
 
 /// Represents a node in the A* search space.
 #[derive(Debug, Eq, PartialEq)]
-struct Node {
+pub struct Node {
     point: Point,
     /// The cost from the start node to this node (g-cost).
     cost: Cost,
@@ -33,7 +33,7 @@ impl PartialOrd for Node {
 }
 
 /// The Manhattan distance heuristic for a grid.
-fn manhattan_distance(a: Point, b: Point) -> Cost {
+pub fn manhattan_distance(a: Point, b: Point) -> Cost {
     ((a.x as i32 - b.x as i32).abs() + (a.y as i32 - b.y as i32).abs()) as Cost
 }
 

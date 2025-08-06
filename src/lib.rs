@@ -9,5 +9,5 @@ pub mod pathfinding;
 
 // Re-export the most important structs for easy access by users of the crate.
 pub use grid::{Cell, Grid, Point};
-pub use pathfinding::a_star;
+pub use pathfinding::{Node, manhattan_distance, a_star};
 pub use automaton::{Moma2dAutomaton, CellularAutomaton};
