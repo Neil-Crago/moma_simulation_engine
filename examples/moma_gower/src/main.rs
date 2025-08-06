@@ -7,15 +7,13 @@
 //! 2. Solve the maze using the A* algorithm.
 //! 3. use a Gower norm to evaluate the path.
 
-use moma_simulation_engine::grid::Point;
-use moma_simulation_engine::maze;
-use moma_simulation_engine::pathfinding;
-use moma_simulation_engine::pathfinding::Node;
-use rustfft::{FftPlanner, num_complex::Complex as FftComplex};
 use moma::core::{MomaRing, OriginStrategy};
 use moma::strategy;
-use pixels::{Error, Pixels, SurfaceTexture};
 use moma_simulation_engine::automaton::Moma2dAutomaton;
+use moma_simulation_engine::grid::Point;
+use moma_simulation_engine::pathfinding::{Node, manhattan_distance};
+use pixels::{Error, Pixels, SurfaceTexture};
+use rustfft::{FftPlanner, num_complex::Complex as FftComplex};
 //use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 use winit::dpi::LogicalSize;
@@ -27,7 +25,6 @@ use winit_input_helper::WinitInputHelper;
 
 const WIDTH: u32 = 256;
 const HEIGHT: u32 = 256;
-
 
 fn calculate_u2_norm_fft(sequence: &mut Vec<FftComplex<f64>>) -> f64 {
     let n = sequence.len();
@@ -43,7 +40,8 @@ fn calculate_u2_norm_fft(sequence: &mut Vec<FftComplex<f64>>) -> f64 {
     fft.process(sequence);
 
     // 3. Calculate the sum of the 4th powers of the magnitudes
-    let sum_of_magnitudes_pow4: f64 = sequence.iter()
+    let sum_of_magnitudes_pow4: f64 = sequence
+        .iter()
         .map(|c| c.norm_sqr().powi(2)) // norm_sqr() is |c|^2. So this is (|c|^2)^2 = |c|^4
         .sum();
 
@@ -52,46 +50,12 @@ fn calculate_u2_norm_fft(sequence: &mut Vec<FftComplex<f64>>) -> f64 {
     norm
 }
 
-fn run_pathfinding() -> (Vec<Point>,std::io::Result<()>) {
-    println!("\n--- MOMA + A* Maze + Gower Solver ---");
-
-    // --- Configuration ---
-    let width = 401;
-    let height = 201;
-    let start = Point::new(0, 1);
-    let goal = Point::new(width - 1, height - 2);
-
-
-    // --- Maze Generation ---
-    println!("Generating a {}x{} maze...", width, height);
-    let grid = maze::generate_maze(width, height);
-    println!("Maze generated.");
-
-    let mut path = Vec::new();
-    // --- Pathfinding ---
-    println!("Solving maze with A*...");
-    if let Some(found_path) = pathfinding::a_star(&grid, start, goal) {
-        println!("Path found with {} steps.", found_path.len());
-        path = found_path;
-    }
- 
-    (path, Ok(()))
-}
-
-//-------
-
-
-// --- A* Pathfinding Logic (Unchanged) ---
-
-fn manhattan_distance(a: Point, b: Point) -> u64 {
-    ((a.x as i64 - b.x as i64).abs() + (a.y as i64 - b.y as i64).abs()) as u64
-}
-
 fn a_star_moma_cost(
     automaton: &Moma2dAutomaton<impl OriginStrategy>,
     cost_ring: &MomaRing<impl OriginStrategy>,
     start: Point,
     goal: Point,
+    structure_penalty_weight: f64,
 ) -> Option<Vec<Point>> {
     let mut frontier = BinaryHeap::new();
     let mut came_from: HashMap<Point, Point> = HashMap::new();
@@ -103,6 +67,9 @@ fn a_star_moma_cost(
         cost: 0,
         heuristic: manhattan_distance(start, goal),
     });
+
+    //cost = g(n) + 1.5 * h(n)
+    //let cost = |g: u32, h: u32| g + (1.5 * h as f64) as u32;
 
     while let Some(current) = frontier.pop() {
         if current.point == goal {
@@ -139,14 +106,38 @@ fn a_star_moma_cost(
             let current_val = automaton.state[current.point.y * automaton.width + current.point.x];
             let next_val = automaton.state[next_point.y * automaton.width + next_point.x];
             let move_cost = cost_ring.residue(current_val, next_val) + 1;
-            let new_cost = cost_so_far[&current.point] + move_cost;
 
+            // Calculate a penalty based on the turning angle.
+            let mut structure_penalty = 0.0;
+            if let Some(&prev_point) = came_from.get(&current.point) {
+                // We have a previous point, so we can calculate the turn.
+                let dx1 = current.point.x as i32 - prev_point.x as i32;
+                let dy1 = current.point.y as i32 - prev_point.y as i32;
+
+                let dx2 = next_point.x as i32 - current.point.x as i32;
+                let dy2 = next_point.y as i32 - current.point.y as i32;
+
+                // If the vectors are the same (i.e., we're going straight), apply a penalty.
+                if dx1 == dx2 && dy1 == dy2 {
+                    structure_penalty = structure_penalty_weight; // High penalty for continuing straight
+                }
+            }
+
+            let new_cost = cost_so_far[&current.point] + move_cost + (structure_penalty as u64);
+
+            // Check if the next point is valid in the cost map
+            // and if the new cost is lower than the existing cost.
+            // If the next point is not in the cost map, it will return None.
+            // If the next point is in the cost map, it will return Some(value).
+            // This is a more idiomatic way to handle the cost check.
+            // The `contains_key` method checks if the key exists in the map.
+            // The `cost_so_far[&next_point]` will panic if the key does
             if !cost_so_far.contains_key(&next_point) || new_cost < cost_so_far[&next_point] {
                 cost_so_far.insert(next_point, new_cost);
                 let priority = manhattan_distance(next_point, goal);
                 frontier.push(Node {
                     point: next_point,
-                    cost: new_cost,
+                    cost: new_cost as u32,
                     heuristic: priority,
                 });
                 came_from.insert(next_point, current.point);
@@ -156,9 +147,10 @@ fn a_star_moma_cost(
     None
 }
 
-// --- Main Application ---
-
-
+/// Runs the dynamic pathfinding example using MOMA and A* algorithm with Gower norm.
+/// This function sets up the event loop, initializes the automaton, and handles user input for dynamic pathfinding.
+/// It draws the automaton state and the calculated path to the pixel buffer, allowing for real
+/// time visualization of the pathfinding process.
 fn dynamic_pathfinding() -> Result<(), Error> {
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
@@ -174,8 +166,7 @@ fn dynamic_pathfinding() -> Result<(), Error> {
 
     let mut pixels = {
         let window_size = window.inner_size();
-        let surface_texture =
-            SurfaceTexture::new(window_size.width, window_size.height, &window);
+        let surface_texture = SurfaceTexture::new(window_size.width, window_size.height, &window);
         Pixels::new(WIDTH, HEIGHT, surface_texture)?
     };
 
@@ -192,6 +183,16 @@ fn dynamic_pathfinding() -> Result<(), Error> {
         y: HEIGHT as usize / 2,
     };
     let mut path: Option<Vec<Point>> = None;
+
+    let target_norm = 0.25; // 0.58 works better!
+
+    // If we are making progress (error is decreasing), it's okay to increase the penalty.
+    // But if the error is stuck or increasing, we should slowly decay the penalty
+    // to see if we can get the same result with less effort.
+    // This requires storing the previous frame's error.
+    //let mut last_error = 0.0;
+
+    let mut structure_penalty_weight: f64 = 0.0;
 
     event_loop.run(move |event, _, control_flow| {
         // Draw the current state
@@ -224,7 +225,55 @@ fn dynamic_pathfinding() -> Result<(), Error> {
 
             // Update internal state and request a redraw
             automaton.step();
-            path = a_star_moma_cost(&automaton, &cost_ring, start, goal);
+            // Pass the CURRENT policy to the pathfinder
+            path = a_star_moma_cost(
+                &automaton,
+                &cost_ring,
+                start,
+                goal,
+                structure_penalty_weight,
+            );
+
+            let maze_path: Vec<(i32, i32)> = path
+                .as_ref()
+                .map(|p| p.iter().map(|pt| (pt.x as i32, pt.y as i32)).collect())
+                .unwrap_or_default();
+
+            let mut p_to_complexfft = path_to_complex_sequence_fft(&maze_path);
+            let u2_norm_fft = calculate_u2_norm_fft(&mut p_to_complexfft);
+            if u2_norm_fft < 0.0001 {
+                println!("Path Norm is too small, resetting penalty weight.");
+                structure_penalty_weight = 0.0; // Reset penalty weight if norm is too small
+            }
+
+
+//let target_norm = 0.25;
+let error = u2_norm_fft - target_norm;
+
+// --- New, Smoother PI Controller Logic ---
+
+// 1. A small, proportional gain to nudge the penalty in the right direction.
+//    Note: This gain is much smaller than your previous '50.0'.
+let proportional_gain = 5.0; 
+
+// 2. A decay rate to represent the "cost of effort".
+let decay_rate = 0.01; // Equivalent to multiplying by 0.99
+
+// 3. Calculate the adjustment based on the current error.
+let adjustment = error * proportional_gain;
+
+// 4. Apply the new logic: decay the old weight and add the new adjustment.
+structure_penalty_weight = (structure_penalty_weight * (1.0 - decay_rate)) + adjustment;
+
+// Ensure the penalty never goes below zero.
+structure_penalty_weight = structure_penalty_weight.max(0.0);
+
+//last_error = error;
+
+println!(
+                "Path Norm: {:.3}, Target: {:.3}, Penalty Weight: {:.3}",
+                u2_norm_fft, target_norm, structure_penalty_weight
+            );
             window.request_redraw();
         }
     });
@@ -260,35 +309,39 @@ fn state_to_color(state: u64) -> [u8; 4] {
     let b = (200.0 * (1.0 - ratio)) as u8 + 55;
     [r, g, b, 255]
 }
-//-------
 
 fn path_to_complex_sequence_fft(path: &Vec<(i32, i32)>) -> Vec<FftComplex<f64>> {
-     let mut complex_sequence: Vec<FftComplex<f64>> = Vec::new();
-   if path.len() < 2 { return complex_sequence; }
-   
-   for p in 1..path.len() {
-       let dx = path[p].0 - path[p-1].0;
-       let dy = path[p].1 - path[p-1].1;
-       let angle = (dy as f64).atan2(dx as f64);
-       complex_sequence.push(FftComplex::new(angle.cos(), angle.sin()));
-   }
-   complex_sequence
-    
+    let mut complex_sequence: Vec<FftComplex<f64>> = Vec::new();
+    if path.len() < 2 {
+        return complex_sequence;
+    }
+
+    for p in 1..path.len() {
+        let dx = path[p].0 - path[p - 1].0;
+        let dy = path[p].1 - path[p - 1].1;
+        let angle = (dy as f64).atan2(dx as f64);
+        complex_sequence.push(FftComplex::new(angle.cos(), angle.sin()));
+    }
+    complex_sequence
 }
 
 fn main() {
-    
+    dynamic_pathfinding().unwrap_or_else(|e| {
+        eprintln!("Error running dynamic pathfinding: {}", e);
+    });
+    println!("\n--- End of Dynamic A* + Gower Pathfinding Example ---\n");
+    /*
     let path = run_pathfinding();
     if let Err(e) = path.1 {
         eprintln!("Error running pathfinding: {}", e);
         return;
     }
-    
+
     println!("\ntest with path to complex data\n");
     let straight_line = vec![(0,0), (1,0), (2,0), (3,0), (4,0), (5,0)];
     let staircase = vec![(0,0), (1,0), (1,1), (2,1), (2,2), (3,2)];
     let maze_path: Vec<(i32, i32)> = path.0.iter().map(|p| (p.x as i32, p.y as i32)).collect();
-  
+
     let mut p1 = path_to_complex_sequence_fft(&straight_line);
     let mut p2 = path_to_complex_sequence_fft(&staircase);
     let mut p3 = path_to_complex_sequence_fft(&maze_path);
@@ -296,10 +349,9 @@ fn main() {
     let c1 = calculate_u2_norm_fft(&mut p1);
     let c2 = calculate_u2_norm_fft(&mut p2);
     let c3 = calculate_u2_norm_fft(&mut p3);
-   
+
     println!("straight_line = {c1:>3.9}");
     println!("staircase = {c2:>3.9}");
     println!("maze_path = {c3:>3.9}");
-
-    println!("\n--- End of A* Maze Solver + Gower Example ---\n");
+    */
 }
