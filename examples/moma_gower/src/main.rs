@@ -253,7 +253,7 @@ let error = u2_norm_fft - target_norm;
 // --- New, Smoother PI Controller Logic ---
 
 // 1. A small, proportional gain to nudge the penalty in the right direction.
-//    Note: This gain is much smaller than your previous '50.0'.
+//    Note: This gain is much smaller than my previous '50.0'.
 let proportional_gain = 5.0; 
 
 // 2. A decay rate to represent the "cost of effort".
