@@ -52,14 +52,15 @@ name = "moma_network_flow_manager"
 version = "0.1.0"
 dependencies = [
  "moma_simulation_engine",
+ "ordered-float",
  "rustfft",
 ]
 
 [[package]]
 name = "moma_simulation_engine"
-version = "0.2.4"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cd8bd0d1ea686260b0627367e957a5fadecf07b5b0607920437ab85ec4dca0d"
+checksum = "1729018cbc7ddbbc6df643a3ab7dbcef00d1f71d36bcca6ba9bddff2cbd36a72"
 dependencies = [
  "moma",
  "rand",
@@ -90,6 +91,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
+]
+
+[[package]]
+name = "ordered-float"
+version = "5.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2c1f9f56e534ac6a9b8a4600bdf0f530fb393b5f393e7b4d03489c3cf0c3f01"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]

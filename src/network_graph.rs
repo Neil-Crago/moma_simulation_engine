@@ -8,13 +8,15 @@
 // Make sure it's accessible from this module.
 use crate::grid::Point; // Assuming Point is in a `grid` module. Adjust if needed.
 use std::collections::HashMap;
+use ordered_float::OrderedFloat;
+use std::collections::BinaryHeap;
 
 /// Represents a directed connection between two nodes in the graph.
 #[derive(Debug, Clone)]
 pub struct Edge {
     pub to: Point,
     pub capacity: u64,
-    pub cost: i64,     // Changed from u64 to i64
+    pub cost: f64,     // Changed from u64 to i64
     pub flow: u64,
 }
 
@@ -46,17 +48,16 @@ impl Graph {
 
     /// Adds a directed edge to the graph.
     /// This will be the primary way we build our network from the maze or automaton state.
-    pub fn add_edge(&mut self, from: Point, to: Point, capacity: u64, cost: i64) { // Changed here
+   pub fn add_edge(&mut self, from: Point, to: Point, capacity: u64, cost: f64) { // Update signature
         self.add_node(from);
         self.add_node(to);
 
-        let forward_edge = Edge {
+        self.adj.get_mut(&from).unwrap().push(Edge {
             to,
             capacity,
-            cost, // This now correctly uses the i64
+            cost,
             flow: 0,
-        };
-        self.adj.get_mut(&from).unwrap().push(forward_edge);
+        });
     }
 
     /// A helper to get all outgoing edges from a given node.
@@ -76,20 +77,21 @@ impl Graph {
    // In src/network_graph.rs, inside `impl Graph`
 
     fn find_cheapest_path_dijkstra(&self) -> (HashMap<Point, Point>, bool) {
-        let mut distances: HashMap<Point, i64> = HashMap::new(); // Use i64
+        let mut distances: HashMap<Point, f64> = HashMap::new();
         let mut parent_map = HashMap::new();
-        let mut pq = std::collections::BinaryHeap::new();
+        let mut pq = BinaryHeap::new();
 
-        distances.insert(self.source, 0);
-        pq.push((0, self.source)); // `0` is now a valid i64
+        distances.insert(self.source, 0.0);
+        // We use OrderedFloat to allow f64 in the max-heap.
+        // We still negate to make it a min-heap.
+        pq.push((OrderedFloat(-0.0), self.source));
 
         while let Some((cost, u)) = pq.pop() {
-            let cost = -cost; // This now works perfectly on an i64
+            let cost = -cost.into_inner(); // unwrap the OrderedFloat
 
-            if cost > *distances.get(&u).unwrap_or(&i64::MAX) { // Use i64::MAX
+            if cost > *distances.get(&u).unwrap_or(&f64::MAX) {
                 continue;
             }
-
             if u == self.sink {
                 return (parent_map, true);
             }
@@ -97,9 +99,9 @@ impl Graph {
             for edge in self.get_edges(&u) {
                 if edge.capacity > edge.flow {
                     let new_dist = cost + edge.cost;
-                    if new_dist < *distances.get(&edge.to).unwrap_or(&i64::MAX) { // Use i64::MAX
+                    if new_dist < *distances.get(&edge.to).unwrap_or(&f64::MAX) {
                         distances.insert(edge.to, new_dist);
-                        pq.push((-new_dist, edge.to)); // This also now works
+                        pq.push((OrderedFloat(-new_dist), edge.to));
                         parent_map.insert(edge.to, u);
                     }
                 }

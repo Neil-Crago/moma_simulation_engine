@@ -13,10 +13,6 @@ use std::collections::BTreeMap;
 
 // --- Simulation Parameters ---
 const SIMULATION_STEPS: u32 = 10;
-const TARGET_GOWERS_NORM: f64 = 0.5; // Target: A moderately complex flow pattern.
-// In src/main.rs
-
-const COST_ADJUSTMENT_FACTOR: i64 = 5; // How much to penalize the busiest edge.
 
 /// Creates a simple "diamond" graph for testing the flow manager.
 /// This graph has two main paths from source to sink:
@@ -57,9 +53,16 @@ fn path_to_complex_sequence_fft(path: &[Point]) -> Vec<FftComplex<f64>> {
     }
     complex_sequence
 }
+// In src/main.rs
 
 fn main() {
     println!("--- MOMA Network Flow Manager ---");
+    
+    // --- Controller Tuning ---
+    const TARGET_GOWERS_NORM: f64 = 0.85;  // An achievable target for this graph
+    const COST_ADJUSTMENT_GAIN: f64 = 10.0; // Proportional gain for adjustments
+    const COST_DECAY_RATE: f64 = 0.90;      // Cost penalties decay by 10% each step
+
     let source = Point { x: 0, y: 1 };
     let sink = Point { x: 3, y: 1 };
     let mut graph = create_diamond_graph(source, sink);
@@ -67,14 +70,20 @@ fn main() {
     for i in 0..SIMULATION_STEPS {
         println!("\n--- Step {} ---", i + 1);
 
+        // --- Apply Cost Decay ---
+        // All edge costs slowly decay back towards their base cost of 1.
+        for edges in graph.adj.values_mut() {
+            for edge in edges {
+                edge.cost = 1 + ((edge.cost - 1) as f64 * COST_DECAY_RATE) as i64;
+            }
+        }
+
         // --- TACTICIAN ---
-        // The Tactician now returns the flow AND the path it chose.
         let (flow_this_step, path_opt) = graph.route_cheapest_path();
         println!("  - Flow Routed This Step: {}", flow_this_step);
 
         if let Some(path) = path_opt {
             // --- OBSERVE & ORIENT ---
-            // We now analyze the geometry of the path, not the whole graph's flow.
             let mut complex_sequence = path_to_complex_sequence_fft(&path);
             let gowers_norm = calculate_u2_norm_fft(&mut complex_sequence);
             println!("  - Gowers Norm of Path: {:.4}", gowers_norm);
@@ -84,28 +93,28 @@ fn main() {
             println!("  - Norm Error: {:.4}", error);
 
             if error > 0.0 {
-                println!("  - Policy: Path is too simple. Increasing cost on its first edge.");
+                let adjustment = (error * COST_ADJUSTMENT_GAIN) as i64;
+                println!("  - Policy: Path is too simple. Applying cost penalty of {}.", adjustment);
                 let first_edge_from = path[0];
                 let first_edge_to = path[1];
                 if let Some(edge) = graph.adj.get_mut(&first_edge_from).unwrap().iter_mut().find(|e| e.to == first_edge_to) {
-                    edge.cost += COST_ADJUSTMENT_FACTOR;
+                    edge.cost += adjustment;
                     println!("  - Action: Cost of edge {:?} -> {:?} is now {}", first_edge_from, first_edge_to, edge.cost);
                 }
             } else {
-                println!("  - Policy: Path complexity is on target. No cost changes.");
+                println!("  - Policy: Path complexity is on target. STABILIZING.");
             }
         }
         
-        // Reset all flows for the next iteration.
+        // Reset flows for the next iteration.
         for edges in graph.adj.values_mut() {
             for edge in edges { edge.flow = 0; }
         }
     }
     println!("\n--- Simulation Complete ---");
 }
-
 /// Converts the graph's flow values into a canonical, sorted sequence for analysis.
-fn flow_to_sequence(graph: &Graph) -> Vec<f64> {
+fn _flow_to_sequence(graph: &Graph) -> Vec<f64> {
     // BTreeMap gives us a sorted, canonical ordering of nodes.
     let sorted_adj: BTreeMap<_, _> = graph.adj.iter().collect();
     let mut sequence = Vec::new();
@@ -132,7 +141,7 @@ fn calculate_u2_norm_fft(sequence: &mut Vec<FftComplex<f64>>) -> f64 {
     (sum_of_magnitudes_pow4 / (n as f64).powi(4)).powf(1.0 / 4.0)
 }
 
-fn values_to_complex_sequence_fft(values: &[f64]) -> Vec<FftComplex<f64>> {
+fn _values_to_complex_sequence_fft(values: &[f64]) -> Vec<FftComplex<f64>> {
     // This function is now more generic: it converts any sequence of f64 values.
     // We'll normalize by the max value to keep numbers between 0 and 1.
     let max_val = values.iter().copied().fold(f64::NEG_INFINITY, f64::max);
