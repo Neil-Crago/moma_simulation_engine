@@ -25,15 +25,15 @@ The system operates on a continuous feedback loop, allowing it to "think" and ad
 
 ```mermaid
 graph TD
-    subgraph The Strategist (Outer Ring)
+    subgraph "The Strategist (Outer Ring)"
         A[Observe Chosen Path] --> B{Orient: Is path structure<br>on target?};
-        B -- No, too simple --> C[Decide: Increase cost<br>of simple paths];
+        B -- No, too simple --> C[Decide: Adjust Penalty Weight];
         B -- Yes --> D[Decide: Stabilize];
         C --> E[Act: Update Graph Costs];
         D --> E;
     end
 
-    subgraph The Tactician (Inner Ring)
+    subgraph "The Tactician (Inner Ring)"
         F[Find Cheapest Path<br>in Graph] --> G[Route Flow];
     end
 
