@@ -144,4 +144,42 @@ impl Graph {
         }
         max_flow
     }
+
+    // In src/network_graph.rs, inside `impl Graph`
+
+    /// Finds the single cheapest path and routes flow down it.
+    /// This replaces edmonds_karp to act as a policy-driven Tactician.
+    pub fn route_cheapest_path(&mut self) -> u64 {
+        // Step 1: Find the single cheapest path with available capacity.
+        let (parent_map, sink_found) = self.find_cheapest_path_dijkstra();
+
+        if !sink_found {
+            return 0; // No path found, so no flow.
+        }
+
+        // Step 2: Calculate the bottleneck capacity of that single path.
+        let mut path_flow = u64::MAX;
+        let mut current = self.sink;
+        while current != self.source {
+            let prev = parent_map[&current];
+            let edge = self.adj.get(&prev).unwrap().iter()
+                .find(|e| e.to == current).unwrap();
+            path_flow = path_flow.min(edge.capacity - edge.flow);
+            current = prev;
+        }
+
+        // Step 3: Push that single "convoy" of flow down the path.
+        let mut v = self.sink;
+        while v != self.source {
+            let u = parent_map[&v];
+            if let Some(edge) = self.adj.get_mut(&u).unwrap().iter_mut()
+                .find(|e| e.to == v) {
+                edge.flow += path_flow;
+            }
+            v = u;
+        }
+
+        // Return the amount of flow we just pushed.
+        path_flow
+    }
 }

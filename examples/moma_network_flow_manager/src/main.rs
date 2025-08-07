@@ -50,9 +50,9 @@ fn main() {
     for i in 0..SIMULATION_STEPS {
         println!("\n--- Step {} ---", i + 1);
 
-        // 1. TACTICIAN: Run the max-flow algorithm based on current costs.
-        let total_flow = graph.edmonds_karp();
-        println!("  - Max Flow Calculated: {}", total_flow);
+        // 1. TACTICIAN: Route flow down the single cheapest path.
+        let total_flow = graph.route_cheapest_path(); // Changed from edmonds_karp
+        println!("  - Flow Routed This Step: {}", total_flow);
 
         // 2. OBSERVE: Convert the flow distribution into a canonical sequence.
         let flow_sequence = flow_to_sequence(&graph);
