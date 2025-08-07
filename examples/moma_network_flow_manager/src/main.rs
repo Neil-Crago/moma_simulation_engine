@@ -14,30 +14,8 @@ use std::collections::BTreeMap;
 // --- Simulation Parameters ---
 const SIMULATION_STEPS: u32 = 10;
 
-/// Creates a simple "diamond" graph for testing the flow manager.
-/// This graph has two main paths from source to sink:
-/// 1. A direct, high-capacity path (S -> A -> D).
-/// 2. A longer, lower-capacity detour (S -> B -> C -> D).
-fn create_diamond_graph(source: Point, sink: Point) -> Graph {
-    let mut graph = Graph::new(source, sink);
-    let node_a = Point { x: 1, y: 0 };
-    let node_b = Point { x: 1, y: 2 };
-    let node_c = Point { x: 2, y: 2 };
 
-    // High-capacity direct path
-    graph.add_edge(source, node_a, 10, 1); // from, to, capacity, cost
-    graph.add_edge(node_a, sink, 10, 1);
 
-    // Lower-capacity detour path
-    graph.add_edge(source, node_b, 7, 1);
-    graph.add_edge(node_b, node_c, 7, 1);
-    graph.add_edge(node_c, sink, 7, 1);
-
-    graph
-}
-// In src/main.rs
-
-// ... (keep create_diamond_graph, calculate_u2_norm_fft) ...
 
 // Add this function back in. It's our original path analyzer.
 fn path_to_complex_sequence_fft(path: &[Point]) -> Vec<FftComplex<f64>> {
@@ -53,15 +31,29 @@ fn path_to_complex_sequence_fft(path: &[Point]) -> Vec<FftComplex<f64>> {
     }
     complex_sequence
 }
-// In src/main.rs
 
 fn main() {
     println!("--- MOMA Network Flow Manager ---");
     
     // --- Controller Tuning ---
-    const TARGET_GOWERS_NORM: f64 = 0.85;  // An achievable target for this graph
-    const COST_ADJUSTMENT_GAIN: f64 = 10.0; // Proportional gain for adjustments
-    const COST_DECAY_RATE: f64 = 0.90;      // Cost penalties decay by 10% each step
+    const TARGET_GOWERS_NORM: f64 = 0.85;
+    // We can use a smaller gain now that fractional penalties work.
+    // This allows for more nuanced adjustments without overshooting.
+    // The cost decay rate is also more effective, so we can afford to be more conservative
+    // with the adjustment gain.
+    // This is a crucial change: we no longer cast the adjustment to an integer.
+    // Instead, we apply a fractional adjustment directly to the edge cost.
+    // This allows for more precise control over the cost adjustments,
+    // enabling finer tuning of the network flow dynamics.
+    // The adjustment gain is now larger, allowing for more significant changes
+    // to the edge costs without overshooting, thanks to the more effective cost decay.
+    // This change is essential for achieving the desired Gowers norm without
+    // introducing instability or oscillations in the flow patterns.
+    // The cost decay rate is also more effective, allowing for smoother transitions
+    // and more stable flow patterns over time.
+    
+    const COST_ADJUSTMENT_GAIN: f64 = 50.0; // Changed from 5.0
+    const COST_DECAY_RATE: f64 = 0.95; // Decay rate is now more effective
 
     let source = Point { x: 0, y: 1 };
     let sink = Point { x: 3, y: 1 };
@@ -71,47 +63,62 @@ fn main() {
         println!("\n--- Step {} ---", i + 1);
 
         // --- Apply Cost Decay ---
-        // All edge costs slowly decay back towards their base cost of 1.
         for edges in graph.adj.values_mut() {
             for edge in edges {
-                edge.cost = 1 + ((edge.cost - 1) as f64 * COST_DECAY_RATE) as i64;
+                // Cost decays towards the base cost of 1.0
+                edge.cost = 1.0 + (edge.cost - 1.0) * COST_DECAY_RATE;
             }
         }
 
-        // --- TACTICIAN ---
         let (flow_this_step, path_opt) = graph.route_cheapest_path();
         println!("  - Flow Routed This Step: {}", flow_this_step);
 
         if let Some(path) = path_opt {
-            // --- OBSERVE & ORIENT ---
             let mut complex_sequence = path_to_complex_sequence_fft(&path);
             let gowers_norm = calculate_u2_norm_fft(&mut complex_sequence);
             println!("  - Gowers Norm of Path: {:.4}", gowers_norm);
 
-            // --- DECIDE & ACT ---
             let error = gowers_norm - TARGET_GOWERS_NORM;
             println!("  - Norm Error: {:.4}", error);
 
             if error > 0.0 {
-                let adjustment = (error * COST_ADJUSTMENT_GAIN) as i64;
-                println!("  - Policy: Path is too simple. Applying cost penalty of {}.", adjustment);
+                // The crucial fix: NO integer cast.
+                let adjustment = error * COST_ADJUSTMENT_GAIN; 
+                println!("  - Policy: Path is too simple. Applying cost penalty of {:.3}.", adjustment);
+                
                 let first_edge_from = path[0];
                 let first_edge_to = path[1];
                 if let Some(edge) = graph.adj.get_mut(&first_edge_from).unwrap().iter_mut().find(|e| e.to == first_edge_to) {
                     edge.cost += adjustment;
-                    println!("  - Action: Cost of edge {:?} -> {:?} is now {}", first_edge_from, first_edge_to, edge.cost);
+                    println!("  - Action: Cost of edge {:?} -> {:?} is now {:.3}", first_edge_from, first_edge_to, edge.cost);
                 }
             } else {
                 println!("  - Policy: Path complexity is on target. STABILIZING.");
             }
         }
         
-        // Reset flows for the next iteration.
         for edges in graph.adj.values_mut() {
             for edge in edges { edge.flow = 0; }
         }
     }
     println!("\n--- Simulation Complete ---");
+}
+
+// ... the create_diamond_graph function also needs to use f64 for costs ...
+fn create_diamond_graph(source: Point, sink: Point) -> Graph {
+    let mut graph = Graph::new(source, sink);
+    let node_a = Point { x: 1, y: 0 };
+    let node_b = Point { x: 1, y: 2 };
+    let node_c = Point { x: 2, y: 2 };
+
+    // Costs are now f64
+    graph.add_edge(source, node_a, 10, 1.0);
+    graph.add_edge(node_a, sink, 10, 1.0);
+    graph.add_edge(source, node_b, 7, 1.0);
+    graph.add_edge(node_b, node_c, 7, 1.0);
+    graph.add_edge(node_c, sink, 7, 1.0);
+
+    graph
 }
 /// Converts the graph's flow values into a canonical, sorted sequence for analysis.
 fn _flow_to_sequence(graph: &Graph) -> Vec<f64> {

@@ -2,8 +2,11 @@
 name = "moma_network_flow_manager"
 version = "0.1.0"
 edition = "2024"
+authors = ["Neil Crago"]
+description = "A simulation engine for managing network flows in MOMA."
+license = "MIT OR Apache-2.0"
+
 
 [dependencies]
-moma_simulation_engine = "0.2.5"
-ordered-float = "5.0.0"
+moma_simulation_engine = "0.2.6"
 rustfft = "6.4.0"

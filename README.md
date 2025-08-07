@@ -35,7 +35,7 @@ To use this engine in your own project, add it to your `Cargo.toml`.
 
 ```toml
 [dependencies]
-moma_simulation_engine = "0.2.6" # Or the most recent version
+moma_simulation_engine = "0.2.7" # Or the most recent version
 ```
 or just use ```cargo add moma_simulation_engine``` from the command line.
 
