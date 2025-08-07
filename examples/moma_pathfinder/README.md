@@ -1,3 +1,7 @@
-# MOMA Cellular Automaton Runner
+# A* Maze Solver Example
 
-This example creates and runs a 1D cellular automaton powered by the **MOMA** simulation engine. It initializes the automaton with a random state and then simulates its evolution over a number of steps, printing each generation to the console.
+This program demonstrates the use of the `pathfinder` module to:
+
+ 1. Generate a random maze.
+ 2. Solve the maze using the A* algorithm.
+ 3. Draw the maze and the solved path to a JPEG image.

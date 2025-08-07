@@ -6,8 +6,10 @@ pub mod automaton;
 pub mod grid;
 pub mod maze;
 pub mod pathfinding;
+pub mod network_graph;
 
 // Re-export the most important structs for easy access by users of the crate.
 pub use grid::{Cell, Grid, Point};
 pub use pathfinding::{Node, manhattan_distance, a_star};
 pub use automaton::{Moma2dAutomaton, CellularAutomaton};
+pub use network_graph::{Graph, Edge};

@@ -1,0 +1,10 @@
+[package]
+name = "moma_agent_behavioural_analysis"
+version = "0.1.0"
+edition = "2024"
+authors = ["Neil Crago"]
+
+[dependencies]
+moma = "0.3.0"
+moma_simulation_engine = "0.2.1"
+rustfft = "6.4.0"

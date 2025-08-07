@@ -1,0 +1,8 @@
+[package]
+name = "moma_network_flow_manager"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+moma_simulation_engine = "0.2.1"
+rustfft = "6.4.0"
