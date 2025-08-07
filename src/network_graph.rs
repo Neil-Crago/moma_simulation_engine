@@ -149,37 +149,43 @@ impl Graph {
 
     /// Finds the single cheapest path and routes flow down it.
     /// This replaces edmonds_karp to act as a policy-driven Tactician.
-    pub fn route_cheapest_path(&mut self) -> u64 {
-        // Step 1: Find the single cheapest path with available capacity.
+// In src/network_graph.rs, inside `impl Graph`
+
+    /// Finds the single cheapest path and routes flow, returning the flow and the path itself.
+    pub fn route_cheapest_path(&mut self) -> (u64, Option<Vec<Point>>) {
         let (parent_map, sink_found) = self.find_cheapest_path_dijkstra();
 
         if !sink_found {
-            return 0; // No path found, so no flow.
+            return (0, None);
         }
 
-        // Step 2: Calculate the bottleneck capacity of that single path.
-        let mut path_flow = u64::MAX;
+        // --- Reconstruct the path ---
+        let mut path = vec![self.sink];
         let mut current = self.sink;
         while current != self.source {
-            let prev = parent_map[&current];
-            let edge = self.adj.get(&prev).unwrap().iter()
-                .find(|e| e.to == current).unwrap();
+            current = parent_map[&current];
+            path.push(current);
+        }
+        path.reverse();
+        let path_clone = path.clone(); // Clone it to return later
+
+        // --- Calculate bottleneck and push flow ---
+        let mut path_flow = u64::MAX;
+        for i in 0..path.len() - 1 {
+            let u = path[i];
+            let v = path[i+1];
+            let edge = self.adj.get(&u).unwrap().iter().find(|e| e.to == v).unwrap();
             path_flow = path_flow.min(edge.capacity - edge.flow);
-            current = prev;
         }
 
-        // Step 3: Push that single "convoy" of flow down the path.
-        let mut v = self.sink;
-        while v != self.source {
-            let u = parent_map[&v];
-            if let Some(edge) = self.adj.get_mut(&u).unwrap().iter_mut()
-                .find(|e| e.to == v) {
+        for i in 0..path.len() - 1 {
+            let u = path[i];
+            let v = path[i+1];
+            if let Some(edge) = self.adj.get_mut(&u).unwrap().iter_mut().find(|e| e.to == v) {
                 edge.flow += path_flow;
             }
-            v = u;
         }
-
-        // Return the amount of flow we just pushed.
-        path_flow
+        
+        (path_flow, Some(path_clone))
     }
 }

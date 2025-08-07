@@ -39,10 +39,27 @@ fn create_diamond_graph(source: Point, sink: Point) -> Graph {
 
     graph
 }
+// In src/main.rs
+
+// ... (keep create_diamond_graph, calculate_u2_norm_fft) ...
+
+// Add this function back in. It's our original path analyzer.
+fn path_to_complex_sequence_fft(path: &[Point]) -> Vec<FftComplex<f64>> {
+    if path.len() < 2 { return Vec::new(); }
+    let mut complex_sequence = Vec::new();
+    for i in 1..path.len() {
+        let p1 = path[i-1];
+        let p2 = path[i];
+        let dx = p2.x as i64 - p1.x as i64;
+        let dy = p2.y as i64 - p1.y as i64;
+        let angle = (dy as f64).atan2(dx as f64);
+        complex_sequence.push(FftComplex::new(angle.cos(), angle.sin()));
+    }
+    complex_sequence
+}
 
 fn main() {
     println!("--- MOMA Network Flow Manager ---");
-
     let source = Point { x: 0, y: 1 };
     let sink = Point { x: 3, y: 1 };
     let mut graph = create_diamond_graph(source, sink);
@@ -50,56 +67,38 @@ fn main() {
     for i in 0..SIMULATION_STEPS {
         println!("\n--- Step {} ---", i + 1);
 
-        // 1. TACTICIAN: Route flow down the single cheapest path.
-        let total_flow = graph.route_cheapest_path(); // Changed from edmonds_karp
-        println!("  - Flow Routed This Step: {}", total_flow);
+        // --- TACTICIAN ---
+        // The Tactician now returns the flow AND the path it chose.
+        let (flow_this_step, path_opt) = graph.route_cheapest_path();
+        println!("  - Flow Routed This Step: {}", flow_this_step);
 
-        // 2. OBSERVE: Convert the flow distribution into a canonical sequence.
-        let flow_sequence = flow_to_sequence(&graph);
+        if let Some(path) = path_opt {
+            // --- OBSERVE & ORIENT ---
+            // We now analyze the geometry of the path, not the whole graph's flow.
+            let mut complex_sequence = path_to_complex_sequence_fft(&path);
+            let gowers_norm = calculate_u2_norm_fft(&mut complex_sequence);
+            println!("  - Gowers Norm of Path: {:.4}", gowers_norm);
 
-        // 3. ORIENT: Calculate the Gowers norm of the flow pattern.
-        let mut complex_sequence = values_to_complex_sequence_fft(&flow_sequence);
-        let gowers_norm = calculate_u2_norm_fft(&mut complex_sequence);
-        println!("  - Gowers Norm of Flow: {:.4}", gowers_norm);
+            // --- DECIDE & ACT ---
+            let error = gowers_norm - TARGET_GOWERS_NORM;
+            println!("  - Norm Error: {:.4}", error);
 
-        // 4. DECIDE: Compare to the target and determine policy adjustment.
-        let error = gowers_norm - TARGET_GOWERS_NORM;
-        println!("  - Norm Error: {:.4}", error);
-
-        if error > 0.0 {
-            // Flow is too structured; penalize the busiest path.
-            println!("  - Policy: Flow is too structured. Increasing cost on busiest edge.");
-            
-            // Find the edge with the highest flow to penalize it.
-            let mut busiest_edge_from = source;
-            let mut busiest_edge_to = source;
-            let mut max_flow_on_edge = 0;
-
-            for (from_node, edges) in &graph.adj {
-                for edge in edges {
-                    if edge.flow > max_flow_on_edge {
-                        max_flow_on_edge = edge.flow;
-                        busiest_edge_from = *from_node;
-                        busiest_edge_to = edge.to;
-                    }
+            if error > 0.0 {
+                println!("  - Policy: Path is too simple. Increasing cost on its first edge.");
+                let first_edge_from = path[0];
+                let first_edge_to = path[1];
+                if let Some(edge) = graph.adj.get_mut(&first_edge_from).unwrap().iter_mut().find(|e| e.to == first_edge_to) {
+                    edge.cost += COST_ADJUSTMENT_FACTOR;
+                    println!("  - Action: Cost of edge {:?} -> {:?} is now {}", first_edge_from, first_edge_to, edge.cost);
                 }
+            } else {
+                println!("  - Policy: Path complexity is on target. No cost changes.");
             }
-            
-            // 5. ACT: Apply the new policy by increasing the cost.
-            if let Some(edge) = graph.adj.get_mut(&busiest_edge_from).unwrap()
-                .iter_mut().find(|e| e.to == busiest_edge_to) {
-                edge.cost += COST_ADJUSTMENT_FACTOR;
-                println!("  - Action: Cost of edge {:?} -> {:?} is now {}", busiest_edge_from, busiest_edge_to, edge.cost);
-            }
-        } else {
-            println!("  - Policy: Flow complexity is at or below target. No cost changes.");
         }
         
-        // Reset flow for the next iteration's calculation.
+        // Reset all flows for the next iteration.
         for edges in graph.adj.values_mut() {
-            for edge in edges {
-                edge.flow = 0;
-            }
+            for edge in edges { edge.flow = 0; }
         }
     }
     println!("\n--- Simulation Complete ---");
