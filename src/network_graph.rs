@@ -13,9 +13,9 @@ use std::collections::HashMap;
 #[derive(Debug, Clone)]
 pub struct Edge {
     pub to: Point,
-    pub capacity: u64, // The maximum flow the edge can handle.
-    pub cost: u64,     // The cost to send flow, adjusted by the Strategist.
-    pub flow: u64,     // The current flow being pushed through the edge.
+    pub capacity: u64,
+    pub cost: i64,     // Changed from u64 to i64
+    pub flow: u64,
 }
 
 /// Represents the entire flow network, including all nodes and edges.
@@ -46,16 +46,14 @@ impl Graph {
 
     /// Adds a directed edge to the graph.
     /// This will be the primary way we build our network from the maze or automaton state.
-    pub fn add_edge(&mut self, from: Point, to: Point, capacity: u64, cost: u64) {
-        // Ensure the 'from' node exists in the adjacency list.
+    pub fn add_edge(&mut self, from: Point, to: Point, capacity: u64, cost: i64) { // Changed here
         self.add_node(from);
         self.add_node(to);
 
-        // Add the forward edge.
         let forward_edge = Edge {
             to,
             capacity,
-            cost,
+            cost, // This now correctly uses the i64
             flow: 0,
         };
         self.adj.get_mut(&from).unwrap().push(forward_edge);
@@ -72,77 +70,75 @@ impl Graph {
         })
     }
 
-    /// Finds a path from source to sink with available capacity using BFS.
-    /// This is the "scout" part of the Edmonds-Karp algorithm.
+    /// Finds the cheapest path from source to sink using Dijkstra's algorithm.
+    /// This version is cost-aware and replaces the simple BFS.
     /// It returns a map of parent pointers to reconstruct the path.
-    fn bfs(&self) -> HashMap<Point, Point> {
-        let mut queue = std::collections::VecDeque::new();
-        queue.push_back(self.source);
+   // In src/network_graph.rs, inside `impl Graph`
 
-        let mut visited = std::collections::HashSet::new();
-        visited.insert(self.source);
-
+    fn find_cheapest_path_dijkstra(&self) -> (HashMap<Point, Point>, bool) {
+        let mut distances: HashMap<Point, i64> = HashMap::new(); // Use i64
         let mut parent_map = HashMap::new();
+        let mut pq = std::collections::BinaryHeap::new();
 
-        while let Some(u) = queue.pop_front() {
-            if u == self.sink {
-                break; // Found a path to the sink
+        distances.insert(self.source, 0);
+        pq.push((0, self.source)); // `0` is now a valid i64
+
+        while let Some((cost, u)) = pq.pop() {
+            let cost = -cost; // This now works perfectly on an i64
+
+            if cost > *distances.get(&u).unwrap_or(&i64::MAX) { // Use i64::MAX
+                continue;
             }
 
-            // Check all outgoing edges for available capacity
+            if u == self.sink {
+                return (parent_map, true);
+            }
+
             for edge in self.get_edges(&u) {
-                if !visited.contains(&edge.to) && edge.capacity > edge.flow {
-                    visited.insert(edge.to);
-                    queue.push_back(edge.to);
-                    parent_map.insert(edge.to, u);
+                if edge.capacity > edge.flow {
+                    let new_dist = cost + edge.cost;
+                    if new_dist < *distances.get(&edge.to).unwrap_or(&i64::MAX) { // Use i64::MAX
+                        distances.insert(edge.to, new_dist);
+                        pq.push((-new_dist, edge.to)); // This also now works
+                        parent_map.insert(edge.to, u);
+                    }
                 }
             }
         }
-        parent_map
+        (parent_map, distances.contains_key(&self.sink))
     }
-
-    /// Calculates the maximum flow from source to sink using the Edmonds-Karp algorithm.
-    /// This is our "Rope" or Tactician.
+    
+    /// Calculates the maximum flow, now using a cost-aware pathfinding method.
     pub fn edmonds_karp(&mut self) -> u64 {
         let mut max_flow = 0;
-
         loop {
-            let parent_map = self.bfs();
+            // Use the new Dijkstra-based pathfinder
+            let (parent_map, sink_found) = self.find_cheapest_path_dijkstra();
 
-            // If BFS couldn't find a path to the sink, we're done.
-            if !parent_map.contains_key(&self.sink) {
-                break;
+            if !sink_found {
+                break; // No more paths to the sink
             }
 
-            // --- Path found, now find the bottleneck capacity ---
+            // --- Path found, find bottleneck capacity ---
             let mut path_flow = u64::MAX;
             let mut current = self.sink;
             while current != self.source {
                 let prev = parent_map[&current];
-                
-                // Find the specific edge in the adjacency list to check its capacity
                 let edge = self.adj.get(&prev).unwrap().iter()
                     .find(|e| e.to == current).unwrap();
-
                 path_flow = path_flow.min(edge.capacity - edge.flow);
                 current = prev;
             }
 
-            // --- Augment the flow along the path ---
+            // --- Augment flow ---
             max_flow += path_flow;
             let mut v = self.sink;
             while v != self.source {
                 let u = parent_map[&v];
-                
-                // Update flow on the forward edge
                 if let Some(edge) = self.adj.get_mut(&u).unwrap().iter_mut()
                     .find(|e| e.to == v) {
                     edge.flow += path_flow;
                 }
-                
-                // Note: A full implementation also handles backward edges for flow reduction,
-                // but for our simulation, this simplified augmentation is a great start.
-
                 v = u;
             }
         }

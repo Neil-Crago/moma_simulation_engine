@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-moma_simulation_engine = "0.2.1"
+moma_simulation_engine = "0.2.2"
 rustfft = "6.4.0"

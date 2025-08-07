@@ -6,14 +6,17 @@
 //! towards a target level of structural complexity (Gowers norm).
 
 
-use moma_simulation_engine::network_graph::{Graph, Point};
+use moma_simulation_engine::network_graph::Graph;
+use moma_simulation_engine::grid::Point;
 use rustfft::{num_complex::Complex as FftComplex, FftPlanner};
 use std::collections::BTreeMap;
 
 // --- Simulation Parameters ---
 const SIMULATION_STEPS: u32 = 10;
 const TARGET_GOWERS_NORM: f64 = 0.5; // Target: A moderately complex flow pattern.
-const COST_ADJUSTMENT_FACTOR: u64 = 5; // How much to penalize the busiest edge.
+// In src/main.rs
+
+const COST_ADJUSTMENT_FACTOR: i64 = 5; // How much to penalize the busiest edge.
 
 /// Creates a simple "diamond" graph for testing the flow manager.
 /// This graph has two main paths from source to sink:

@@ -13,3 +13,4 @@ pub use grid::{Cell, Grid, Point};
 pub use pathfinding::{Node, manhattan_distance, a_star};
 pub use automaton::{Moma2dAutomaton, CellularAutomaton};
 pub use network_graph::{Graph, Edge};
+pub use maze::generate_maze;
