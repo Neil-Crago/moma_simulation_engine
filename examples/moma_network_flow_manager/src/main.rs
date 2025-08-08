@@ -14,6 +14,13 @@ use std::collections::BTreeMap;
 // --- Simulation Parameters ---
 const SIMULATION_STEPS: u32 = 10;
 
+<<<<<<< HEAD
+=======
+
+
+
+// my original path analyzer.
+>>>>>>> a2a8cb71ed35c9964da56dd971fb7d16ec94d9f7
 fn path_to_complex_sequence_fft(path: &[Point]) -> Vec<FftComplex<f64>> {
     if path.len() < 2 { return Vec::new(); }
     let mut complex_sequence = Vec::new();
@@ -32,7 +39,13 @@ fn main() {
     println!("--- MOMA Network Flow Manager ---");
     
     // --- Controller Tuning ---
+<<<<<<< HEAD
     const TARGET_GOWERS_NORM: f64 = 0.85;    
+=======
+    const TARGET_GOWERS_NORM: f64 = 0.85;
+    
+    // We can use a smaller gain now that fractional penalties work.
+>>>>>>> a2a8cb71ed35c9964da56dd971fb7d16ec94d9f7
     const COST_ADJUSTMENT_GAIN: f64 = 50.0; // Changed from 5.0
     const COST_DECAY_RATE: f64 = 0.95; // Decay rate is now more effective
 
