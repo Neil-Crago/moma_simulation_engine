@@ -17,7 +17,7 @@ const SIMULATION_STEPS: u32 = 10;
 
 
 
-// Add this function back in. It's our original path analyzer.
+// my original path analyzer.
 fn path_to_complex_sequence_fft(path: &[Point]) -> Vec<FftComplex<f64>> {
     if path.len() < 2 { return Vec::new(); }
     let mut complex_sequence = Vec::new();
