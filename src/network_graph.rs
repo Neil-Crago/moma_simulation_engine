@@ -74,7 +74,6 @@ impl Graph {
     /// Finds the cheapest path from source to sink using Dijkstra's algorithm.
     /// This version is cost-aware and replaces the simple BFS.
     /// It returns a map of parent pointers to reconstruct the path.
-   // In src/network_graph.rs, inside `impl Graph`
 
     fn find_cheapest_path_dijkstra(&self) -> (HashMap<Point, Point>, bool) {
         let mut distances: HashMap<Point, f64> = HashMap::new();
@@ -147,11 +146,9 @@ impl Graph {
         max_flow
     }
 
-    // In src/network_graph.rs, inside `impl Graph`
 
     /// Finds the single cheapest path and routes flow down it.
     /// This replaces edmonds_karp to act as a policy-driven Tactician.
-// In src/network_graph.rs, inside `impl Graph`
 
     /// Finds the single cheapest path and routes flow, returning the flow and the path itself.
     pub fn route_cheapest_path(&mut self) -> (u64, Option<Vec<Point>>) {
