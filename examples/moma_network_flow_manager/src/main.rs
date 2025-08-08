@@ -37,21 +37,8 @@ fn main() {
     
     // --- Controller Tuning ---
     const TARGET_GOWERS_NORM: f64 = 0.85;
-    // We can use a smaller gain now that fractional penalties work.
-    // This allows for more nuanced adjustments without overshooting.
-    // The cost decay rate is also more effective, so we can afford to be more conservative
-    // with the adjustment gain.
-    // This is a crucial change: we no longer cast the adjustment to an integer.
-    // Instead, we apply a fractional adjustment directly to the edge cost.
-    // This allows for more precise control over the cost adjustments,
-    // enabling finer tuning of the network flow dynamics.
-    // The adjustment gain is now larger, allowing for more significant changes
-    // to the edge costs without overshooting, thanks to the more effective cost decay.
-    // This change is essential for achieving the desired Gowers norm without
-    // introducing instability or oscillations in the flow patterns.
-    // The cost decay rate is also more effective, allowing for smoother transitions
-    // and more stable flow patterns over time.
     
+    // We can use a smaller gain now that fractional penalties work.
     const COST_ADJUSTMENT_GAIN: f64 = 50.0; // Changed from 5.0
     const COST_DECAY_RATE: f64 = 0.95; // Decay rate is now more effective
 
