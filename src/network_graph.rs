@@ -1,8 +1,8 @@
 //! # Network Graph Module
-//!
-//! Provides the foundational data structures for representing a flow network.
-//! This includes nodes, directed edges with capacity and cost, and the main
-//! graph container. It's the "Chain" in our BRC architecture.
+//
+// Provides the foundational data structures for representing a flow network.
+// This includes nodes, directed edges with capacity and cost, and the main
+// graph container. It's the "Chain" in our BRC architecture.
 
 // We reuse the Point struct from our existing pathfinding work.
 // Make sure it's accessible from this module.

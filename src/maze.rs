@@ -1,7 +1,7 @@
 //! # Maze Generation Module
-//!
-//! Provides functions for generating random mazes using a randomized
-//! depth-first search algorithm.
+
+// Provides functions for generating random mazes using a randomized
+// depth-first search algorithm.
 
 use crate::grid::{Cell, Grid, Point};
 use rand::seq::SliceRandom;

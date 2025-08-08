@@ -1,6 +1,6 @@
-//! # A* Pathfinding Module
-//!
-//! Provides a generic implementation of the A* search algorithm.
+//! A* Pathfinding Module
+//
+// Provides a generic implementation of the A* search algorithm.
 
 use crate::grid::{Grid, Point};
 use std::cmp::Ordering;

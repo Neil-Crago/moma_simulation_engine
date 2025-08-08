@@ -35,7 +35,7 @@ To use this engine in your own project, add it to your `Cargo.toml`.
 
 ```toml
 [dependencies]
-moma_simulation_engine = "0.2.7" # Or the most recent version
+moma_simulation_engine = "0.2.8" # Or the most recent version
 ```
 or just use ```cargo add moma_simulation_engine``` from the command line.
 
@@ -90,6 +90,9 @@ The examples directory includes:
   * **Moma_pathfinder** - A static Graph model 
   * **moma_dynamic_pathfinder** - A Dynamic Graph model where node states are updated via MOMA rules.
   * **moma_gower** - An experimental simulation in Rust demonstrating a self-regulating AI agent. This project uses an A\* pathfinding algorithm to navigate a dynamic, procedurally generated world. The agent's decision-making is governed by a **MOMA (Multi-Objective Meta-Observer Architecture)** feedback loop, which uses **Gowers Uniformity Norms** to analyze the geometric complexity of its own solution paths and adapt its strategy in real-time.
+  * **moma_network_flow_manager** - An experimental simulation in Rust demonstrating a self-regulating system that manages network flow. This project showcases an agent that uses a **MOMA (Moving Origin Modular Arithmetic)** inspired architecture to achieve a high-level, abstract goal. Instead of simply maximizing flow, the agent dynamically adjusts its strategy to maintain a target level of "resilience" or "structural complexity" in its chosen paths, a property measured quantitatively using **Gowers Uniformity Norms**.
+  * **moma_agent_behavioural_analysis** - This is an experiment wherein different MOMA Origin Strategies will produce quantitatively different "personalities" in the agent. We can measure this personality by observing the trade-offs it makes between path efficiency (length) and path complexity (Gowers norm). It was a necessary first step before attempting the **moma_network_flow_manager.**
+  * **mom_quantum_simulator** - A simple, educational quantum circuit simulator built in Rust from first principles. This project demonstrates the core concepts of quantum computing, including superposition, entanglement, and measurement, through a clean, step-by-step implementation.
 
 ## License
 

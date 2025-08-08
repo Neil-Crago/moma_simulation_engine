@@ -1,0 +1,10 @@
+[package]
+name = "moma_quantum_simulator"
+version = "0.1.0"
+edition = "2024"
+authors = ["Neil Crago"]
+
+[dependencies]
+moma_simulation_engine = "0.2.7"
+num-complex = "0.4.6"
+rand = "0.9.2"

@@ -1,11 +1,7 @@
 //! Moma Pathfinder + Gower norm project
-//! This project demonstrates the use of the `moma_simulation_engine` crate to solve a maze using the A* algorithm and to compute the Gower norm of the resulting path.
-//! It generates a random maze, finds a path from the start to the goal, and then computes the Gower norm of the path.
-//!
-//! This program demonstrates the use of the `pathfinder` crate to:
-//! 1. Generate a random maze.
-//! 2. Solve the maze using the A* algorithm.
-//! 3. use a Gower norm to evaluate the path.
+//
+// This project demonstrates the use of the `moma_simulation_engine` crate to solve a maze using the A* algorithm and to compute the Gower norm of the resulting path.
+// It generates a random maze, finds a path from the start to the goal, and then computes the Gower norm of the path.
 
 use moma::core::{MomaRing, OriginStrategy};
 use moma::strategy;
@@ -125,13 +121,6 @@ fn a_star_moma_cost(
 
             let new_cost = cost_so_far[&current.point] + move_cost + (structure_penalty as u64);
 
-            // Check if the next point is valid in the cost map
-            // and if the new cost is lower than the existing cost.
-            // If the next point is not in the cost map, it will return None.
-            // If the next point is in the cost map, it will return Some(value).
-            // This is a more idiomatic way to handle the cost check.
-            // The `contains_key` method checks if the key exists in the map.
-            // The `cost_so_far[&next_point]` will panic if the key does
             if !cost_so_far.contains_key(&next_point) || new_cost < cost_so_far[&next_point] {
                 cost_so_far.insert(next_point, new_cost);
                 let priority = manhattan_distance(next_point, goal);
@@ -147,10 +136,6 @@ fn a_star_moma_cost(
     None
 }
 
-/// Runs the dynamic pathfinding example using MOMA and A* algorithm with Gower norm.
-/// This function sets up the event loop, initializes the automaton, and handles user input for dynamic pathfinding.
-/// It draws the automaton state and the calculated path to the pixel buffer, allowing for real
-/// time visualization of the pathfinding process.
 fn dynamic_pathfinding() -> Result<(), Error> {
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
@@ -186,11 +171,6 @@ fn dynamic_pathfinding() -> Result<(), Error> {
 
     let target_norm = 0.25; // 0.58 works better!
 
-    // If we are making progress (error is decreasing), it's okay to increase the penalty.
-    // But if the error is stuck or increasing, we should slowly decay the penalty
-    // to see if we can get the same result with less effort.
-    // This requires storing the previous frame's error.
-    //let mut last_error = 0.0;
 
     let mut structure_penalty_weight: f64 = 0.0;
 
@@ -250,8 +230,6 @@ fn dynamic_pathfinding() -> Result<(), Error> {
 //let target_norm = 0.25;
 let error = u2_norm_fft - target_norm;
 
-// --- New, Smoother PI Controller Logic ---
-
 // 1. A small, proportional gain to nudge the penalty in the right direction.
 //    Note: This gain is much smaller than my previous '50.0'.
 let proportional_gain = 5.0; 
@@ -267,8 +245,6 @@ structure_penalty_weight = (structure_penalty_weight * (1.0 - decay_rate)) + adj
 
 // Ensure the penalty never goes below zero.
 structure_penalty_weight = structure_penalty_weight.max(0.0);
-
-//last_error = error;
 
 println!(
                 "Path Norm: {:.3}, Target: {:.3}, Penalty Weight: {:.3}",
@@ -330,28 +306,4 @@ fn main() {
         eprintln!("Error running dynamic pathfinding: {}", e);
     });
     println!("\n--- End of Dynamic A* + Gower Pathfinding Example ---\n");
-    /*
-    let path = run_pathfinding();
-    if let Err(e) = path.1 {
-        eprintln!("Error running pathfinding: {}", e);
-        return;
-    }
-
-    println!("\ntest with path to complex data\n");
-    let straight_line = vec![(0,0), (1,0), (2,0), (3,0), (4,0), (5,0)];
-    let staircase = vec![(0,0), (1,0), (1,1), (2,1), (2,2), (3,2)];
-    let maze_path: Vec<(i32, i32)> = path.0.iter().map(|p| (p.x as i32, p.y as i32)).collect();
-
-    let mut p1 = path_to_complex_sequence_fft(&straight_line);
-    let mut p2 = path_to_complex_sequence_fft(&staircase);
-    let mut p3 = path_to_complex_sequence_fft(&maze_path);
-
-    let c1 = calculate_u2_norm_fft(&mut p1);
-    let c2 = calculate_u2_norm_fft(&mut p2);
-    let c3 = calculate_u2_norm_fft(&mut p3);
-
-    println!("straight_line = {c1:>3.9}");
-    println!("staircase = {c2:>3.9}");
-    println!("maze_path = {c3:>3.9}");
-    */
 }

@@ -1,12 +1,13 @@
 //! MOMA Agent Behavioral Analysis Experiment
-//!
-//! This program automates the process of testing and profiling the emergent
-//! behavior of our MOMA-powered agent. It runs a series of headless simulations,
-//! each using a different MOMA OriginStrategy, and collects data on the
-//! resulting path length and geometric complexity (Gowers norm).
-//!
-//! The final output is a report comparing the "personality" of the agent
-//! under each strategic configuration.
+
+//
+// This program automates the process of testing and profiling the emergent
+// behavior of our MOMA-powered agent. It runs a series of headless simulations,
+// each using a different MOMA OriginStrategy, and collects data on the
+// resulting path length and geometric complexity (Gowers norm).
+//
+// The final output is a report comparing the "personality" of the agent
+// under each strategic configuration.
 
 use moma::core::{MomaRing, OriginStrategy};
 use moma::strategy;

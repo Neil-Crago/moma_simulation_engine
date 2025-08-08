@@ -1,7 +1,7 @@
-//! # MOMA Conway's Game of Life Example
-//!
-//! A visual demonstration of Conway's Game of Life where the initial state
-//! is generated using a MOMA signature sequence.
+//! MOMA Conway's Game of Life Example
+//
+// A visual demonstration of Conway's Game of Life where the initial state
+// is generated using a MOMA signature sequence.
 
 use moma::core::MomaRing;
 use moma::strategy;

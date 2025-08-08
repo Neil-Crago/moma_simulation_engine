@@ -6,4 +6,5 @@
 /examples/moma_gower/target
 /examples/moma_agent_behavioural_analysis/target
 /examples/moma_network_flow_manager/target
+/examples/moma_quantum_simulator/target
 /*.lock

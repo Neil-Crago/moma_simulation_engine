@@ -1,7 +1,7 @@
 //! # Grid Module
-//!
-//! Provides the fundamental data structures for working with a 2D grid,
-//! including `Point`, `Cell` state, and the `Grid` itself.
+//
+// Provides the fundamental data structures for working with a 2D grid,
+// including `Point`, `Cell` state, and the `Grid` itself.
 
 use std::ops::{Index, IndexMut};
 
