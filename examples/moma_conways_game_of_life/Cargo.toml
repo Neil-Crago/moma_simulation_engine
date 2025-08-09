@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-moma = "0.3.0"
+moma = "0.3.2"
 moma_simulation_engine = "0.1.7"
 # --- Graphics Dependencies ---
 pixels = "0.13.0"

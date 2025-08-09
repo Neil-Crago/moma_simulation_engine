@@ -2,7 +2,7 @@
 name = "moma_simulation_engine"
 authors = ["Neil Crago"]
 description = "A Simulation engine powered by MOMA"
-version = "0.2.8"
+version = "0.2.9"
 edition = "2024"
 license = "MIT"
 repository = "https://github.com/neil-crago/moma_simulation_engine"
@@ -17,7 +17,7 @@ include = [
 ]
 
 [dependencies]
-moma = "0.3.0"
+moma = "0.3.2"
 num-complex = "0.4.6"
 ordered-float = "5.0.0"
 rand = "0.9.2"

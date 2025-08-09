@@ -473,7 +473,7 @@ dependencies = [
 
 [[package]]
 name = "moma"
-version = "0.3.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6709d72da1d63d417f13a4dcfa8f8ce21d306e6fa7756dfbecd628ae890b6742"
 dependencies = [
@@ -516,7 +516,7 @@ dependencies = [
 
 [[package]]
 name = "noop_proc_macro"
-version = "0.3.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0676bb32a98c1a483ce53e500a81ad9c3d5b3f7c920c28c24e9cb0980d0b5bc8"
 

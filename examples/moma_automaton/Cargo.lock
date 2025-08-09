@@ -34,7 +34,7 @@ checksum = "1171693293099992e19cddea4e8b849964e9846f4acee11b3948bcc337be8776"
 
 [[package]]
 name = "moma"
-version = "0.3.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6709d72da1d63d417f13a4dcfa8f8ce21d306e6fa7756dfbecd628ae890b6742"
 dependencies = [
