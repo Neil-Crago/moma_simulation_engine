@@ -94,6 +94,10 @@ The examples directory includes:
   * **moma_agent_behavioural_analysis** - This is an experiment wherein different MOMA Origin Strategies will produce quantitatively different "personalities" in the agent. We can measure this personality by observing the trade-offs it makes between path efficiency (length) and path complexity (Gowers norm). It was a necessary first step before attempting the **moma_network_flow_manager.**
   * **moma_quantum_simulator** - A simple, educational quantum circuit simulator built in Rust from first principles. This project demonstrates the core concepts of quantum computing, including superposition, entanglement, and measurement, through a clean, step-by-step implementation.
 
+## Author
+
+Neil Crago — experimental mathematician, Rust architect, and philosophical explorer of mathematical beauty.
+
 ## License
 
 This project is licensed under either of:

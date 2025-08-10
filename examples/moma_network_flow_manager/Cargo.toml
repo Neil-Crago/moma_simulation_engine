@@ -8,5 +8,5 @@ license = "MIT OR Apache-2.0"
 
 
 [dependencies]
-moma_simulation_engine = "0.2.6"
+moma_simulation_engine = "0.3.0"
 rustfft = "6.4.0"
