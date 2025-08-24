@@ -35,7 +35,7 @@ To use this engine in your own project, add it to your `Cargo.toml`.
 
 ```toml
 [dependencies]
-moma_simulation_engine = "0.2.9" # Or the most recent version
+moma_simulation_engine = "0.3.1" # Or the most recent version
 ```
 or just use ```cargo add moma_simulation_engine``` from the command line.
 
@@ -96,7 +96,7 @@ The examples directory includes:
 
 ## Author
 
-Neil Crago — experimental mathematician, Rust architect, and philosophical explorer of mathematical beauty.
+Neil Crago — experimental mathematician.
 
 ## License
 
@@ -106,3 +106,12 @@ This project is licensed under either of:
   * MIT license
 
 at your option. 
+
+## Related Crates
+This crate is part of a collection of crates by the same author:
+These include:-
+  * MOMA
+  * Fractal_Algebra
+  * tma_engine
+  * factorial_engine
+  * fa_slow_ai

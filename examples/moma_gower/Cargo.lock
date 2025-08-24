@@ -523,7 +523,7 @@ dependencies = [
 
 [[package]]
 name = "jni-sys"
-version = "0.3.2"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8eaf4bc02d17cbdd7ff4c7438cafcdf7fb9a4613313ad11b4f8fefe7d3fa0130"
 
@@ -688,9 +688,9 @@ dependencies = [
 
 [[package]]
 name = "moma"
-version = "0.3.2"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6709d72da1d63d417f13a4dcfa8f8ce21d306e6fa7756dfbecd628ae890b6742"
+checksum = "3057b807f7b38a7c7e6429e693b194fde0f001fae66e4cec98bd7c2d043995f0"
 dependencies = [
  "rand",
 ]
@@ -710,11 +710,13 @@ dependencies = [
 
 [[package]]
 name = "moma_simulation_engine"
-version = "0.2.1"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24e5565e3a9471913d1e7b33e4c2a30ca61f95585b82d8401812864d24b63a88"
+checksum = "0b59aa5ac73a66ae43fdc0bb597adf272b3f197c9696193fe3443ff9ec9f6c28"
 dependencies = [
  "moma",
+ "num-complex",
+ "ordered-float",
  "rand",
 ]
 
@@ -879,7 +881,7 @@ checksum = "df3b9834c1e95694a05a828b59f55fa2afec6288359cda67146126b3f90a55d7"
 
 [[package]]
 name = "objc2"
-version = "0.3.2-beta.3.patch-leaks.3"
+version = "0.3.0-beta.3.patch-leaks.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e01640f9f2cb1220bbe80325e179e532cb3379ebcd1bf2279d703c19fe3a468"
 dependencies = [
@@ -928,6 +930,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba0b26cec2e24f08ed8bb31519a9333140a6599b867dac464bb150bdb796fd43"
 dependencies = [
  "libredox",
+]
+
+[[package]]
+name = "ordered-float"
+version = "5.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2c1f9f56e534ac6a9b8a4600bdf0f530fb393b5f393e7b4d03489c3cf0c3f01"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -1003,7 +1014,7 @@ dependencies = [
 
 [[package]]
 name = "pollster"
-version = "0.3.2"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "22686f4785f02a4fcc856d3b3bb19bf6c8160d103f7a99cc258bddd0251dc7f2"
 
