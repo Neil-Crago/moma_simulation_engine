@@ -1,5 +1,4 @@
 use moma_simulation_engine::circuit::QuantumCircuit;
-use moma_simulation_engine::gates::{HADAMARD, PAULI_X};
 
 fn main() {
     println!("--- Running Deutsch's Algorithm for f(x) = x (a balanced function) ---");

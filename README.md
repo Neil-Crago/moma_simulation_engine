@@ -35,9 +35,14 @@ To use this engine in your own project, add it to your `Cargo.toml`.
 
 ```toml
 [dependencies]
-moma_simulation_engine = "0.3.1" # Or the most recent version
+moma_simulation_engine = "0.3"
 ```
-or just use ```cargo add moma_simulation_engine``` from the command line.
+
+or run:
+
+```bash
+cargo add moma_simulation_engine
+```
 
 ### Quick Start: Running a 1D Automaton
 
@@ -79,20 +84,25 @@ fn main() {
 
 -----
 
-## Current Examples
+## Example gallery
 
-This crate is the first step in exploring MOMA as a tool for modeling complex systems. 
+The examples are best thought of as two groups: stable, educational examples and research-oriented experiments.
 
-The examples directory includes:
+### Official examples
 
-  * **moma_automaton** - 1D Cellular Automata.
-  * **moma_conways_game_of_life** - 2D Cellular Automata.
-  * **Moma_pathfinder** - A static Graph model 
-  * **moma_dynamic_pathfinder** - A Dynamic Graph model where node states are updated via MOMA rules.
-  * **moma_gower** - An experimental simulation in Rust demonstrating a self-regulating AI agent. This project uses an A\* pathfinding algorithm to navigate a dynamic, procedurally generated world. The agent's decision-making is governed by a **MOMA (Multi-Objective Meta-Observer Architecture)** feedback loop, which uses **Gowers Uniformity Norms** to analyze the geometric complexity of its own solution paths and adapt its strategy in real-time.
-  * **moma_network_flow_manager** - An experimental simulation in Rust demonstrating a self-regulating system that manages network flow. This project showcases an agent that uses a **MOMA (Moving Origin Modular Arithmetic)** inspired architecture to achieve a high-level, abstract goal. Instead of simply maximizing flow, the agent dynamically adjusts its strategy to maintain a target level of "resilience" or "structural complexity" in its chosen paths, a property measured quantitatively using **Gowers Uniformity Norms**.
-  * **moma_agent_behavioural_analysis** - This is an experiment wherein different MOMA Origin Strategies will produce quantitatively different "personalities" in the agent. We can measure this personality by observing the trade-offs it makes between path efficiency (length) and path complexity (Gowers norm). It was a necessary first step before attempting the **moma_network_flow_manager.**
-  * **moma_quantum_simulator** - A simple, educational quantum circuit simulator built in Rust from first principles. This project demonstrates the core concepts of quantum computing, including superposition, entanglement, and measurement, through a clean, step-by-step implementation.
+  * **moma_automaton** - Minimal 1D cellular automaton showing the core MOMA update loop.
+  * **moma_conways_game_of_life** - A visual 2D MOMA-driven Conway-style simulation.
+  * **moma_pathfinder** - Maze generation plus A* solving, useful as a clean pathfinding baseline.
+
+### Research / exploratory examples
+
+  * **moma_dynamic_pathfinder** - A dynamic A* example where terrain evolves based on MOMA state.
+  * **moma_gower** - Experimental path-analysis work using Gowers-style complexity as a feedback signal.
+  * **moma_network_flow_manager** - A higher-level systems example for resilience and adaptive flow management.
+  * **moma_agent_behavioural_analysis** - Strategy comparison experiments for agent behavior and path trade-offs.
+  * **moma_quantum_simulator** - An educational quantum circuit demo built from first principles.
+
+This split keeps the crate approachable while preserving the more speculative projects that motivated the original research direction.
 
 ## Author
 
@@ -102,16 +112,18 @@ Neil Crago — experimental mathematician.
 
 This project is licensed under either of:
 
-  * Apache License, Version 2.0
-  * MIT license
+* Apache License, Version 2.0
+* MIT license
 
-at your option. 
+at your option.
 
 ## Related Crates
+
 This crate is part of a collection of crates by the same author:
 These include:-
-  * MOMA
-  * Fractal_Algebra
-  * tma_engine
-  * factorial_engine
-  * fa_slow_ai
+
+* MOMA
+* Fractal_Algebra
+* tma_engine
+* factorial_engine
+* fa_slow_ai
