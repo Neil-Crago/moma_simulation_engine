@@ -106,7 +106,7 @@ This split keeps the crate approachable while preserving the more speculative pr
 
 ## Author
 
-Neil Crago — experimental mathematician.
+Neil Crago
 
 ## License
 
