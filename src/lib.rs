@@ -1,23 +1,35 @@
 //! # MOMA Simulation Engine
 //!
-//! A library for creating and running dynamic systems, such as cellular automata,
-//! using the MOMA framework as the core update rule.
+//! Companion to [`moma`]. It generates synthetic tracks with known ground truth
+//! and uses them to test and compare moma's analysis tools.
+//!
+//! * [`track`]: spirals and helices around a wandering axis, with steady,
+//!   irregular or reversing rotation, noise and dropped samples.
+//! * [`evaluation`]: every axis estimator in [`moma::spiral`] behind one interface,
+//!   scored against the true axis, and merged with moma's barycentric consensus.
+//! * [`automaton`]: a cellular automaton whose update rule is moma's circular
+//!   consensus on `Z_m`.
+//! * [`rng`]: a seedable generator so every run is reproducible.
+//!
+//! ```
+//! use moma_simulation_engine::{Estimator, SpiralSpec, Wander, evaluate};
+//!
+//! let track = SpiralSpec::default()
+//!     .with_wander(Wander::Drift { vx: 0.02, vy: 0.0 })
+//!     .with_noise(0.02)
+//!     .simulate()
+//!     .unwrap();
+//! for report in evaluate(&track, &Estimator::suite(track.period)) {
+//!     println!("{:10} {:?}", report.name, report.axis_error);
+//! }
+//! ```
+
 pub mod automaton;
-pub mod circuit;
-pub mod gates;
-pub mod qubit;
-pub mod grid;
-pub mod maze;
-pub mod pathfinding;
-pub mod network_graph;
+pub mod evaluation;
+pub mod rng;
+pub mod track;
 
-// Re-export the most important structs for easy access by users of the crate.
-
-pub use circuit::QuantumCircuit;
-pub use gates::{HADAMARD, PAULI_X, PAULI_Y, PAULI_Z};
-pub use qubit::Qubit;
-pub use grid::{Cell, Grid, Point};
-pub use pathfinding::{Node, manhattan_distance, a_star};
-pub use automaton::{Moma2dAutomaton, CellularAutomaton};
-pub use network_graph::{Graph, Edge};
-pub use maze::generate_maze;
+pub use automaton::ConsensusAutomaton;
+pub use evaluation::{Estimator, Report, axis_error, consensus, evaluate};
+pub use rng::Rng;
+pub use track::{HelixSpec, Rotation, SpiralSpec, Track2d, Track3d, Wander};
